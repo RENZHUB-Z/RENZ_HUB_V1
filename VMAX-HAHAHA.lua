@@ -1,4 +1,4 @@
--- RENZ HUB VMAX FINAL - FULL SCRIPT - LOGO 85660407447010
+-- RENZ HUB VMAX FINAL - WITH ANTI-CHASE BUTTON - LOGO 85660407447010
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -7,6 +7,7 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
+-- INTRO
 local introGui = Instance.new("ScreenGui")
 introGui.Name = "RenzHubIntro"
 introGui.IgnoreGuiInset = true
@@ -18,7 +19,6 @@ local bgFrame = Instance.new("Frame")
 bgFrame.Size = UDim2.new(1, 0, 1, 0)
 bgFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 bgFrame.BackgroundTransparency = 1
-bgFrame.BorderSizePixel = 0
 bgFrame.Parent = introGui
 
 local logoImage = Instance.new("ImageLabel")
@@ -55,16 +55,9 @@ subText.TextScaled = true
 subText.TextTransparency = 1
 subText.Parent = bgFrame
 
-local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(255, 204, 0)
-stroke.Thickness = 1.5
-stroke.Transparency = 0.5
-stroke.Parent = subText
-
 local function createTween(obj, time, props)
     local t = TweenService:Create(obj, TweenInfo.new(time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props)
-    t:Play()
-    return t
+    t:Play() return t
 end
 
 createTween(bgFrame, 0.5, {BackgroundTransparency = 0})
@@ -80,43 +73,154 @@ createTween(subText, 1, {TextTransparency = 1})
 task.wait(1)
 introGui:Destroy()
 
-local function showNotification(text, isTop)
-    local notifGui = Instance.new("ScreenGui")
-    notifGui.Name = "RenzHubNotifs"
-    notifGui.IgnoreGuiInset = true
-    notifGui.ResetOnSpawn = false
-    notifGui.DisplayOrder = 1000
-    notifGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-    local notifFrame = Instance.new("Frame")
-    notifFrame.Size = UDim2.new(0, 350, 0, 50)
-    notifFrame.Position = UDim2.new(1, 400, 0, isTop and 0.35 or 0.45)
-    notifFrame.AnchorPoint = Vector2.new(1, 0)
-    notifFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    notifFrame.Parent = notifGui
-    Instance.new("UIStroke", notifFrame).Color = Color3.fromRGB(255, 204, 0)
-    local notifText = Instance.new("TextLabel")
-    notifText.Size = UDim2.new(1, -20, 1, 0)
-    notifText.Position = UDim2.new(0.5, 0, 0.5, 0)
-    notifText.AnchorPoint = Vector2.new(0.5, 0.5)
-    notifText.BackgroundTransparency = 1
-    notifText.Text = text
-    notifText.TextColor3 = Color3.fromRGB(255, 204, 0)
-    notifText.Font = Enum.Font.GothamBold
-    notifText.TextScaled = true
-    notifText.Parent = notifFrame
-    TweenService:Create(notifFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(1, -20, 0, isTop and 0.35 or 0.45)}):Play()
-    task.wait(3.5)
-    notifGui:Destroy()
+-- MAIN HUB WITH BUTTON
+if LocalPlayer.PlayerGui:FindFirstChild("RenzHubFinal") then LocalPlayer.PlayerGui:FindFirstChild("RenzHubFinal"):Destroy() end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "RenzHubFinal"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local function makeDraggable(frame, handle)
+    handle = handle or frame
+    local dragging, dragInput, dragStart, startPos
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+        end
+    end)
+    handle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function() dragging = false end)
 end
 
-task.spawn(function()
-    showNotification("🐝 RENZ HUB INSTANT STEAL 🐝", true)
-    task.wait(1)
-    showNotification("🍯 RENZ HUB INSTANT GRAB 🍯", false)
-end)
+-- BEE BUTTON
+local beeLeft = Instance.new("ImageButton")
+beeLeft.Size = UDim2.new(0,80,0,80)
+beeLeft.Position = UDim2.new(0,15,0.48,0)
+beeLeft.BackgroundColor3 = Color3.fromRGB(10,10,10)
+beeLeft.BorderSizePixel = 0
+beeLeft.Parent = gui
+Instance.new("UICorner",beeLeft).CornerRadius = UDim.new(0,18)
+local s = Instance.new("UIStroke",beeLeft) s.Color = Color3.fromRGB(255,204,0) s.Thickness = 2
+local icon = Instance.new("TextLabel")
+icon.Size = UDim2.new(1,0,1,0)
+icon.BackgroundTransparency = 1
+icon.Text = "🐝"
+icon.TextScaled = true
+icon.Parent = beeLeft
+makeDraggable(beeLeft)
 
--- MAIN ANTI-CHASE LOGIC
-local function getAntiChaseState() return true end
+-- PANEL
+local panel = Instance.new("Frame")
+panel.Size = UDim2.new(0,380,0,200)
+panel.Position = UDim2.new(1,-20,0,70)
+panel.AnchorPoint = Vector2.new(1,0)
+panel.BackgroundColor3 = Color3.fromRGB(10,10,20)
+panel.BorderSizePixel = 0
+panel.Parent = gui
+Instance.new("UICorner",panel).CornerRadius = UDim.new(0,16)
+local ps = Instance.new("UIStroke",panel) ps.Color = Color3.fromRGB(255,210,70) ps.Thickness = 2
+
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1,0,0,40)
+titleBar.BackgroundTransparency = 1
+titleBar.Parent = panel
+local title2 = Instance.new("TextLabel")
+title2.Size = UDim2.new(1,-80,1,0)
+title2.Position = UDim2.new(0,10,0,0)
+title2.BackgroundTransparency = 1
+title2.Text = "RENZ HUB | VMAX"
+title2.TextColor3 = Color3.fromRGB(255,220,80)
+title2.Font = Enum.Font.GothamBold
+title2.TextSize = 14
+title2.TextXAlignment = Enum.TextXAlignment.Left
+title2.Parent = titleBar
+makeDraggable(panel, titleBar)
+
+local btnExit = Instance.new("TextButton")
+btnExit.Size = UDim2.new(0,30,0,30)
+btnExit.Position = UDim2.new(1,-35,0,5)
+btnExit.BackgroundColor3 = Color3.fromRGB(255,60,60)
+btnExit.Text = "X"
+btnExit.TextColor3 = Color3.fromRGB(255,255,255)
+btnExit.Font = Enum.Font.GothamBold
+btnExit.TextSize = 16
+btnExit.Parent = titleBar
+Instance.new("UICorner",btnExit).CornerRadius = UDim.new(0,8)
+
+local btnMin = Instance.new("TextButton")
+btnMin.Size = UDim2.new(0,30,0,30)
+btnMin.Position = UDim2.new(1,-70,0,5)
+btnMin.BackgroundColor3 = Color3.fromRGB(60,60,60)
+btnMin.Text = "-"
+btnMin.TextColor3 = Color3.fromRGB(255,255,255)
+btnMin.Font = Enum.Font.GothamBold
+btnMin.TextSize = 18
+btnMin.Parent = titleBar
+Instance.new("UICorner",btnMin).CornerRadius = UDim.new(0,8)
+
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(1,-20,0,25)
+status.Position = UDim2.new(0,10,0,45)
+status.BackgroundTransparency = 1
+status.Text = "ANTI-CHASE: ON ✅"
+status.TextColor3 = Color3.fromRGB(255,220,80)
+status.Font = Enum.Font.GothamBold
+status.TextSize = 14
+status.Parent = panel
+
+-- TOGGLE ANTI-CHASE BUTTON
+local btnAnti = Instance.new("TextButton")
+btnAnti.Size = UDim2.new(1,-20,0,50)
+btnAnti.Position = UDim2.new(0,10,0,75)
+btnAnti.BackgroundColor3 = Color3.fromRGB(0, 200, 80)
+btnAnti.Text = "ANTI-CHASE: ON - TAP TO OFF"
+btnAnti.TextColor3 = Color3.fromRGB(255,255,255)
+btnAnti.Font = Enum.Font.GothamBold
+btnAnti.TextSize = 13
+btnAnti.Parent = panel
+Instance.new("UICorner",btnAnti).CornerRadius = UDim.new(0,10)
+
+-- INSTANT STEAL STATUS
+local btnSteal = Instance.new("TextButton")
+btnSteal.Size = UDim2.new(1,-20,0,40)
+btnSteal.Position = UDim2.new(0,10,0,135)
+btnSteal.BackgroundColor3 = Color3.fromRGB(30,30,30)
+btnSteal.Text = "INSTANT STEAL: ON ✅"
+btnSteal.TextColor3 = Color3.fromRGB(255,204,0)
+btnSteal.Font = Enum.Font.GothamBold
+btnSteal.TextSize = 12
+btnSteal.Parent = panel
+Instance.new("UICorner",btnSteal).CornerRadius = UDim.new(0,10)
+
+local btnToggle = Instance.new("TextButton")
+btnToggle.Size = UDim2.new(1,-20,0,25)
+btnToggle.Position = UDim2.new(0,10,0,180)
+btnToggle.BackgroundColor3 = Color3.fromRGB(255,204,0)
+btnToggle.Text = "PANEL VISIBLE"
+btnToggle.TextColor3 = Color3.fromRGB(0,0,0)
+btnToggle.Font = Enum.Font.GothamBold
+btnToggle.TextSize = 11
+btnToggle.Parent = panel
+Instance.new("UICorner",btnToggle).CornerRadius = UDim.new(0,8)
+
+-- LOGIC
+local AntiChaseEnabled = true
+local panelVisible = true
+
+local function getAntiChaseState() return AntiChaseEnabled end
+
 local updateInstancePropertiesData = {
     Vector3.new(500.62, 70.28, -366.71),
     Vector3.new(508.3, 70.28, -366.02),
@@ -135,6 +239,19 @@ local function updateInstanceProperties(character)
     end
 end
 
+btnAnti.MouseButton1Click:Connect(function()
+    AntiChaseEnabled = not AntiChaseEnabled
+    if AntiChaseEnabled then
+        btnAnti.BackgroundColor3 = Color3.fromRGB(0, 200, 80)
+        btnAnti.Text = "ANTI-CHASE: ON - TAP TO OFF"
+        status.Text = "ANTI-CHASE: ON ✅"
+    else
+        btnAnti.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+        btnAnti.Text = "ANTI-CHASE: OFF - TAP TO ON"
+        status.Text = "ANTI-CHASE: OFF ❌"
+    end
+end)
+
 ProximityPromptService.PromptTriggered:Connect(function(prompt, player)
     if player ~= LocalPlayer then return end
     if not getAntiChaseState() or flag then return end
@@ -145,38 +262,31 @@ ProximityPromptService.PromptTriggered:Connect(function(prompt, player)
     flag = false
 end)
 
-task.spawn(function()
-    local function firePrompt(prompt)
-        if not prompt or not prompt.Parent then return end
-        if fireproximityprompt then pcall(function() fireproximityprompt(prompt, 0) end) end
-    end
-    local function optimizePrompt(prompt)
-        if prompt:IsA("ProximityPrompt") then
-            prompt.HoldDuration = 0
-            prompt.RequiresLineOfSight = false
-        end
-    end
-    for _, desc in ipairs(Workspace:GetDescendants()) do optimizePrompt(desc) end
-    Workspace.DescendantAdded:Connect(optimizePrompt)
-    ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt) firePrompt(prompt) end)
-    UserInputService.InputBegan:Connect(function(input, gpe)
-        if gpe then return end
-        if input.KeyCode == Enum.KeyCode.B then
-            pcall(function()
-                local char = LocalPlayer.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    for _, desc in ipairs(Workspace:GetDescendants()) do
-                        if desc:IsA("ProximityPrompt") and desc.Enabled then
-                            local part = desc:FindFirstAncestorOfClass("BasePart") or desc.Parent
-                            if part and part:IsA("BasePart") then
-                                if (hrp.Position - part.Position).Magnitude <= 35 then firePrompt(desc) end
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-    end)
-    print("RENZ HUB VMAX LOADED")
+btnExit.MouseButton1Click:Connect(function() panel.Visible = false panelVisible = false btnToggle.Text = "PANEL HIDDEN - TAP BEE" end)
+btnMin.MouseButton1Click:Connect(function() panel.Visible = false panelVisible = false btnToggle.Text = "PANEL HIDDEN - TAP BEE" end)
+beeLeft.MouseButton1Click:Connect(function()
+    panelVisible = not panelVisible
+    panel.Visible = panelVisible
+    btnToggle.Text = panelVisible and "PANEL VISIBLE" or "PANEL HIDDEN - TAP BEE"
 end)
+btnToggle.MouseButton1Click:Connect(function()
+    panelVisible = not panelVisible
+    panel.Visible = panelVisible
+    btnToggle.Text = panelVisible and "PANEL VISIBLE" or "PANEL HIDDEN"
+end)
+
+-- INSTANT PROMPT
+for _, desc in ipairs(Workspace:GetDescendants()) do
+    if desc:IsA("ProximityPrompt") then
+        desc.HoldDuration = 0
+        desc.RequiresLineOfSight = false
+    end
+end
+Workspace.DescendantAdded:Connect(function(v)
+    if v:IsA("ProximityPrompt") then
+        v.HoldDuration = 0
+        v.RequiresLineOfSight = false
+    end
+end)
+
+print("RENZ HUB VMAX WITH BUTTON LOADED - LOGO 85660407447010")
