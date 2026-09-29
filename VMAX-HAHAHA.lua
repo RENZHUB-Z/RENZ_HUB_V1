@@ -1,4 +1,4 @@
--- RENZ HUB INTRO + ANTI-HIT - FINAL
+-- RENZ HUB INTRO + ANTI-HIT - FINAL FIXED
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -72,7 +72,6 @@ createTween(subText, 1, {TextTransparency = 1})
 task.wait(1)
 introGui:Destroy()
 
--- ANTI-HIT
 local flag = false
 local spots = {
     Vector3.new(500.62, 70.28, -366.71),
@@ -93,7 +92,6 @@ ProximityPromptService.PromptTriggered:Connect(function(prompt, player)
     flag = false
 end)
 
--- FLOOR STEAL - PRESS B
 task.spawn(function()
     local function firePrompt(p)
         if fireproximityprompt then pcall(function() fireproximityprompt(p, 0) end) end
@@ -109,4 +107,14 @@ task.spawn(function()
         if gpe or input.KeyCode ~= Enum.KeyCode.B then return end
         local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if not hrp then return end
-        for _, v in ipairs
+        for _, v in ipairs(Workspace:GetDescendants()) do
+            if v:IsA("ProximityPrompt") and v.Enabled then
+                local part = v:FindFirstAncestorOfClass("BasePart") or v.Parent
+                if part and part:IsA("BasePart") and (hrp.Position - part.Position).Magnitude <= 35 then
+                    firePrompt(v)
+                end
+            end
+        end
+    end)
+    print("RENZ HUB LOADED - Press B")
+end)
