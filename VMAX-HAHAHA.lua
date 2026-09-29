@@ -116,7 +116,7 @@ local s = Instance.new("UIStroke",beeLeft) s.Color = Color3.fromRGB(255,204,0) s
 local icon = Instance.new("TextLabel")
 icon.Size = UDim2.new(1,0,1,0)
 icon.BackgroundTransparency = 1
-icon.Text = "🐝"
+icon.Text = "RENZ V1"
 icon.TextScaled = true
 icon.Parent = beeLeft
 makeDraggable(beeLeft)
