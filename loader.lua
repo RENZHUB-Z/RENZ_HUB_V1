@@ -1,7 +1,3 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/RENZHUB-Z/RENZ_HUB_V1/main/loader.lua"))()
--- wait yan yung loader mo mismo, eto yung FIXED na code na i-paste sa GitHub:
-
--- RENZ HUB V1 - FIXED WORKING VERSION
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
