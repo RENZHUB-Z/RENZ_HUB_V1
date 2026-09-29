@@ -30,7 +30,6 @@ title.TextSize = 20
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = mainFrame
 
--- LOGO MO - MAY PCALL NA KAYA HINDI NA MASISIRA EXECUTE
 local profile = Instance.new("ImageLabel")
 profile.Size = UDim2.new(0, 50, 0, 50)
 profile.Position = UDim2.new(1, -100, 0, 5)
@@ -50,7 +49,6 @@ closeBtn.Parent = mainFrame
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
 closeBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
 
--- SCROLLABLE NA NGAYON - GAGANA NA LAHAT
 local scroll = Instance.new("ScrollingFrame")
 scroll.Size = UDim2.new(1, -20, 1, -60)
 scroll.Position = UDim2.new(0, 10, 0, 50)
@@ -59,7 +57,6 @@ scroll.CanvasSize = UDim2.new(0, 0, 0, 600)
 scroll.ScrollBarThickness = 8
 scroll.ScrollBarImageColor3 = Color3.fromRGB(138, 43, 226)
 scroll.Active = true
-scroll.ScrollingEnabled = true
 scroll.Parent = mainFrame
 
 local function makeButton(text, x, y)
@@ -82,7 +79,7 @@ local instantBtn = makeButton("INSTANT STEAL\nLOAD", 10, 110)
 local senaBtn = makeButton("SENA HUB 5.2\nLOAD", 310, 110)
 local chilliBtn = makeButton("CHILLI HUB\nLOAD", 10, 210)
 local ubBtn = makeButton("UB HUB (BEST)\nLOAD", 310, 210)
-local flowBtn = makeButton("FLOW AUTH\nLOAD", 10, 310)
+local flowBtn = makeButton("FLOW AUTH\nANTI HIT LOAD", 10, 310)
 
 keylessBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Dodoyung24/script-core/main/Steal-An-Egg"))() end)
 diabloBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Tsuo7/Tsuohub/main/stealanegg"))() end)
@@ -90,4 +87,4 @@ instantBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https:/
 senaBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/senarbitx/sena/refs/heads/main/loader"))() end)
 chilliBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanht/spicy/main/Chilli.lua"))() end)
 ubBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/TeamUBHub/UBLoader/refs/heads/main/Loader.lua"))() end)
-flowBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://flowauth.net/v1/loaders/a31003a235b2c0b904e90cc236eed925.lua"))() end)
+flowBtn.MouseButton1Click:Connect(function() loadstring(game:HttpGet("https://flowauth.net/v1/loaders/92535411e9fd2f0ce8e923e31c42c2ea.lua"))() end)
