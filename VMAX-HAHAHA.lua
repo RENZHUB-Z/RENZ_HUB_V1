@@ -1,4 +1,4 @@
--- RENZ HUB VMAX - BEE HUB FINAL UI (Buttons Inside Rectangle)
+-- RENZ HUB VMAX - FIXED ANTI-CHASE (Hindi na malaglag egg)
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -6,56 +6,13 @@ local ProximityPromptService = game:GetService("ProximityPromptService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- INTRO
-local introGui = Instance.new("ScreenGui")
-introGui.Name = "RenzIntro"
-introGui.IgnoreGuiInset = true
-introGui.ResetOnSpawn = false
-introGui.DisplayOrder = 999
-introGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-local bg = Instance.new("Frame")
-bg.Size = UDim2.new(1,0,1,0)
-bg.BackgroundColor3 = Color3.fromRGB(0,0,0)
-bg.BackgroundTransparency = 1
-bg.Parent = introGui
-local logo = Instance.new("ImageLabel")
-logo.Size = UDim2.new(0,200,0,200)
-logo.Position = UDim2.new(0.5,0,0.5,-40)
-logo.AnchorPoint = Vector2.new(0.5,0.5)
-logo.BackgroundTransparency = 1
-logo.Image = "rbxassetid://85660407447010"
-logo.ImageTransparency = 1
-logo.Parent = bg
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0,600,0,70)
-title.Position = UDim2.new(0.5,0,0.65,0)
-title.AnchorPoint = Vector2.new(0.5,0.5)
-title.BackgroundTransparency = 1
-title.Text = "RENZ HUB"
-title.TextColor3 = Color3.fromRGB(0,140,255)
-title.Font = Enum.Font.GothamBold
-title.TextScaled = true
-title.TextTransparency = 1
-title.Parent = bg
-local function tween(o,t,p) local tw = TweenService:Create(o,TweenInfo.new(t,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),p) tw:Play() return tw end
-tween(bg,0.5,{BackgroundTransparency=0})
-task.wait(0.5)
-tween(logo,1.5,{ImageTransparency=0})
-tween(title,1.5,{TextTransparency=0})
-task.wait(2.5)
-tween(bg,1,{BackgroundTransparency=1})
-tween(logo,1,{ImageTransparency=1})
-tween(title,1,{TextTransparency=1})
-task.wait(1)
-introGui:Destroy()
-
--- MAIN GUI - KATULAD SA PIC MO
 local gui = Instance.new("ScreenGui")
-gui.Name = "RenzBeeHub"
+gui.Name = "RenzHub"
 gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
 gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- LEFT BEE BUTTON (yung sa baba ng Shop)
+-- LEFT BEE BUTTON
 local beeLeft = Instance.new("ImageButton")
 beeLeft.Size = UDim2.new(0,75,0,75)
 beeLeft.Position = UDim2.new(0,15,0.48,0)
@@ -69,11 +26,11 @@ strokeL.Thickness = 3
 local iconL = Instance.new("TextLabel")
 iconL.Size = UDim2.new(1,0,1,0)
 iconL.BackgroundTransparency = 1
-iconL.Text = "🐝"
+iconL.Text = "RENZ HUB"
 iconL.TextScaled = true
 iconL.Parent = beeLeft
 
--- RIGHT RECTANGLE PANEL - BEE HUB | HELPER | ANTI-CHASE (tulad sa pic mo)
+-- RIGHT PANEL - KATULAD SA PIC MO
 local panel = Instance.new("Frame")
 panel.Size = UDim2.new(0,380,0,160)
 panel.Position = UDim2.new(1,-20,0,70)
@@ -90,15 +47,13 @@ local titlePanel = Instance.new("TextLabel")
 titlePanel.Size = UDim2.new(1,-20,0,35)
 titlePanel.Position = UDim2.new(0,10,0,8)
 titlePanel.BackgroundTransparency = 1
-titlePanel.Text = "RENZ HUB 😎| HELPER | ANTI-CHASE"
+titlePanel.Text = "RENZ HUB | HELPER | ANTI-CHASE"
 titlePanel.TextColor3 = Color3.fromRGB(255,220,80)
 titlePanel.Font = Enum.Font.GothamBold
 titlePanel.TextSize = 15
-titlePanel.TextXAlignment = Enum.TextXAlignment.Center
 titlePanel.Parent = panel
 
 local status = Instance.new("TextLabel")
-status.Name = "Status"
 status.Size = UDim2.new(1,-20,0,30)
 status.Position = UDim2.new(0,10,0,50)
 status.BackgroundTransparency = 1
@@ -108,9 +63,7 @@ status.Font = Enum.Font.GothamBold
 status.TextSize = 18
 status.Parent = panel
 
--- BUTTONS NASA LOOB NG RECTANGLE
 local btnTP = Instance.new("TextButton")
-btnTP.Name = "TPButton"
 btnTP.Size = UDim2.new(0.48,0,0,50)
 btnTP.Position = UDim2.new(0,10,0,95)
 btnTP.BackgroundColor3 = Color3.fromRGB(30,30,30)
@@ -120,12 +73,9 @@ btnTP.Font = Enum.Font.GothamBold
 btnTP.TextSize = 16
 btnTP.Parent = panel
 Instance.new("UICorner",btnTP).CornerRadius = UDim.new(0,10)
-local s1 = Instance.new("UIStroke",btnTP)
-s1.Color = Color3.fromRGB(0,200,255)
-s1.Thickness = 2
+Instance.new("UIStroke",btnTP).Color = Color3.fromRGB(0,200,255)
 
 local btnAnti = Instance.new("TextButton")
-btnAnti.Name = "AntiButton"
 btnAnti.Size = UDim2.new(0.48,0,0,50)
 btnAnti.Position = UDim2.new(0.52,0,0,95)
 btnAnti.BackgroundColor3 = Color3.fromRGB(30,30,30)
@@ -135,25 +85,23 @@ btnAnti.Font = Enum.Font.GothamBold
 btnAnti.TextSize = 14
 btnAnti.Parent = panel
 Instance.new("UICorner",btnAnti).CornerRadius = UDim.new(0,10)
-local s2 = Instance.new("UIStroke",btnAnti)
-s2.Color = Color3.fromRGB(255,204,0)
-s2.Thickness = 2
+Instance.new("UIStroke",btnAnti).Color = Color3.fromRGB(255,204,0)
 
--- LOGIC
 local hasEgg = false
 local lastClick = 0
-local spots = {
-    Vector3.new(500.62, 70.28, -366.71),
-    Vector3.new(508.3, 70.28, -366.02),
-    Vector3.new(519.43, 70.28, -366.47),
-    Vector3.new(529.22, 70.28, -366.71),
-    Vector3.new(546.8, 70.28, -364.4),
-}
 
 local function getSafe()
     for _,v in ipairs(Workspace:GetDescendants()) do
         if v:IsA("BasePart") and v.Name:lower():find("safe") then
             return v.CFrame + Vector3.new(0,6,0)
+        end
+    end
+    if Workspace:FindFirstChild("Plots") then
+        for _,plot in ipairs(Workspace.Plots:GetChildren()) do
+            local o = plot:FindFirstChild("Owner") or plot:FindFirstChild("PlotOwner")
+            if o and o.Value == LocalPlayer then
+                return plot:GetPivot() + Vector3.new(0,5,0)
+            end
         end
     end
     return CFrame.new(0,10,0)
@@ -174,15 +122,31 @@ local function safeTP()
     status.Text = "WAS TELEPORT OFF 🥚"
 end
 
+-- FIXED ANTI-CHASE - MALAPIT LANG, DI MALALAGLAG EGG
 local function antiChase()
     local char = LocalPlayer.Character
-    if not char then return end
-    status.Text = "ANTI-CHASE ON 🏃"
-    for _,pos in ipairs(spots) do
-        char:PivotTo(CFrame.new(pos))
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = char.HumanoidRootPart
+    
+    status.Text = "ANTI-CHASE ON 🏃💨"
+    btnAnti.BackgroundColor3 = Color3.fromRGB(255,204,0)
+    btnAnti.TextColor3 = Color3.fromRGB(0,0,0)
+    
+    -- 10x na maliliit na teleport sa paligid lang - pang lito sa kalaban
+    for i=1,12 do
+        local randomAngle = math.random()*math.pi*2
+        local randomDist = math.random(8,20) -- MALAPIT LANG 8-20 studs lang
+        local offset = Vector3.new(math.cos(randomAngle)*randomDist, 0, math.sin(randomAngle)*randomDist)
+        local newPos = hrp.Position + offset
+        
+        char:PivotTo(CFrame.new(newPos + Vector3.new(0,3,0)))
         RunService.Heartbeat:Wait()
+        task.wait(0.08)
     end
+    
     status.Text = "ANTI-CHASE DONE ✅"
+    btnAnti.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    btnAnti.TextColor3 = Color3.fromRGB(255,255,255)
     task.wait(1.5)
     status.Text = "WAS TELEPORT OFF 🥚"
 end
@@ -208,11 +172,8 @@ ProximityPromptService.PromptTriggered:Connect(function(p,plr)
     if plr ~= LocalPlayer then return end
     if p.ObjectText:lower():find("steal") or p.ActionText:lower():find("steal") then
         hasEgg = true
-        status.Text = "🥚 EGG GRABBED!"
+        status.Text = "🥚 EGG GRABBED! READY!"
         beeLeft.BackgroundColor3 = Color3.fromRGB(50,40,0)
-        tween(strokeL,0.2,{Thickness=5})
-        task.wait(0.2)
-        tween(strokeL,0.2,{Thickness=3})
     end
 end)
 
@@ -222,3 +183,5 @@ end
 Workspace.DescendantAdded:Connect(function(v)
     if v:IsA("ProximityPrompt") then v.HoldDuration = 0 v.RequiresLineOfSight = false end
 end)
+
+print("RENZ HUB FIXED - Anti-Chase no longer drops egg")
