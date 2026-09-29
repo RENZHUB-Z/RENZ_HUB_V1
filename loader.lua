@@ -1,0 +1,94 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/RENZHUB-Z/RENZ_HUB_V1/main/loader.lua"))()
+-- wait yan yung loader mo mismo, eto yung FIXED na code na i-paste sa GitHub:
+
+-- RENZ HUB V1 - FIXED WORKING VERSION
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+pcall(function() playerGui:FindFirstChild("RENZ_HUB_V1"):Destroy() end)
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "RENZ_HUB_V1"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 650, 0, 400)
+mainFrame.Position = UDim2.new(0.5, -325, 0.5, -200)
+mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+local stroke = Instance.new("UIStroke", mainFrame)
+stroke.Color = Color3.fromRGB(138, 43, 226)
+stroke.Thickness = 2
+
+local function makeButton(text, pos, parent)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 280, 0, 80)
+    btn.Position = pos
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.TextSize = 16
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = parent
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    return btn
+end
+
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, -20, 0, 40)
+title.Position = UDim2.new(0, 10, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "RENZ HUB V1 - FIXED"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- BUTTONS
+local keylessBtn = makeButton("KEYLESS HUB\nLOAD", UDim2.new(0, 20, 0, 60), mainFrame)
+local diabloBtn = makeButton("DIABLO SCRIPT\nLOAD", UDim2.new(0, 320, 0, 60), mainFrame)
+local instantBtn = makeButton("INSTANT STEAL\nLOAD", UDim2.new(0, 20, 0, 160), mainFrame)
+local senaBtn = makeButton("SENA HUB 5.2\nLOAD", UDim2.new(0, 320, 0, 160), mainFrame)
+local chilliBtn = makeButton("CHILLI HUB\nLOAD", UDim2.new(0, 20, 0, 260), mainFrame)
+local ubBtn = makeButton("UB HUB (BEST)\nLOAD", UDim2.new(0, 320, 0, 260), mainFrame)
+
+-- CLOSE BUTTON
+local closeBtn = Instance.new("TextButton", mainFrame)
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -40, 0, 10)
+closeBtn.Text = "X"
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeBtn.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
+closeBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
+
+-- WORKING SCRIPTS - UPDATED 2026
+keylessBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Dodoyung24/script-core/main/Steal-An-Egg"))() -- No Key Auto Steal【4228700512875534555†L71-L74】
+end)
+
+diabloBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Tsuo7/TsuoHub/main/stealanegg"))() -- Instant Steal + Fast【4228700512875534555†L139-L143】
+end)
+
+instantBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/betdoyvaka/stealanegg/main/Loader.lua"))() -- Yokudo / Auto Drone【4228700512875534555†L118-L122】
+end)
+
+senaBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/senarblx/sena/refs/heads/main/loader"))() -- Sena Hub【4228700512875534555†L147-L151】
+end)
+
+chilliBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))() -- Chilli Hub【4228700512875534555†L126-L130】
+end)
+
+ubBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/TeamUBHub/UBLoader/refs/heads/main/Loader.lua"))() -- UB Hub Auto Steal【4228700512875534555†L143-L147】
+end)
+
+print("RENZ HUB V1 Loaded - All buttons fixed!")
