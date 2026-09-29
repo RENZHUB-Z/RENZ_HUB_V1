@@ -1,0 +1,711 @@
+local element = game
+local element2 = element.GetService(element, "Players")
+local tweenService = game:GetService("TweenService")
+game:GetService("RunService")
+local userInputService = game:GetService("UserInputService")
+local localPlayer = element2.LocalPlayer
+local val = false
+
+local function iterate(val2)
+  if not val2 then
+    return
+  else
+    for index, value in ipairs({ "RightUpperLeg", "RightLowerLeg", "RightFoot" }) do
+      local findFirstChild = val2:FindFirstChild(value)
+      if findFirstChild then
+        findFirstChild.Transparency = 0
+      end
+    end
+    for index2, value2 in ipairs(val2:GetChildren()) do
+      if (value2.Name:sub(1, 8)) == "Korblox_" then
+        value2:Destroy()
+      end
+    end
+    local rightLeg = val2:FindFirstChild("Right Leg")
+    if rightLeg then
+      local korbloxMesh = rightLeg:FindFirstChild("Korblox_Mesh")
+      if korbloxMesh then
+        korbloxMesh:Destroy()
+      end
+      local korbloxSavedMesh = rightLeg:FindFirstChild("Korblox_SavedMesh")
+      if korbloxSavedMesh then
+        local characterMesh = korbloxSavedMesh:Clone()
+        characterMesh.Name = "CharacterMesh"
+        characterMesh.Parent = val2
+        korbloxSavedMesh:Destroy()
+      end
+      local korbloxSavedSpecialMesh = rightLeg:FindFirstChild("Korblox_SavedSpecialMesh")
+      if korbloxSavedSpecialMesh then
+        local specialMesh = korbloxSavedSpecialMesh:Clone()
+        specialMesh.Name = "SpecialMesh"
+        specialMesh.Parent = rightLeg
+        korbloxSavedSpecialMesh:Destroy()
+      end
+      local korbloxOriginalColor = rightLeg:FindFirstChild("Korblox_OriginalColor")
+      if korbloxOriginalColor then
+        rightLeg.Color = korbloxOriginalColor.Value
+        korbloxOriginalColor:Destroy()
+      end
+    end
+    return
+  end
+end
+
+local coreGui = game:GetService("CoreGui")
+local pinokioScriptsKorblox = coreGui:FindFirstChild("PinokioScripts_Korblox")
+local pinokioScriptsKorblox2 = pinokioScriptsKorblox
+
+if not pinokioScriptsKorblox then
+  pinokioScriptsKorblox2 = localPlayer:WaitForChild("PlayerGui"):FindFirstChild("PinokioScripts_Korblox")
+end
+
+if pinokioScriptsKorblox2 then
+  local character = localPlayer.Character
+  if character then
+    iterate(character)
+  end
+  pinokioScriptsKorblox2:Destroy()
+end
+
+local coreGui2 = nil
+local val3 = {
+  pcall(function()
+    coreGui2 = game:GetService("CoreGui")
+    return
+  end), }
+
+if not val3[1] or not coreGui2 then
+  coreGui2 = localPlayer:WaitForChild("PlayerGui")
+end
+
+local pinokioScriptsKorblox3 = Instance.new("ScreenGui")
+pinokioScriptsKorblox3.Name = "PinokioScripts_Korblox"
+pinokioScriptsKorblox3.ResetOnSpawn = false
+pinokioScriptsKorblox3.Parent = coreGui2
+
+-- ===== YELLOW NEON GRADIENT =====
+local colorSequenceKeypoint = ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0))
+local val4 = {
+  colorSequenceKeypoint, (ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 200))), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0)), }
+local colorSequence = ColorSequence.new(val4)
+
+local val5
+
+local function createUIStroke(val6, val7)
+  local uiStroke = Instance.new("UIStroke")
+  uiStroke.Thickness = val7 or 2
+  uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+  uiStroke.LineJoinMode = Enum.LineJoinMode.Round
+  uiStroke.Color = Color3.fromRGB(255, 255, 0) -- Yellow
+  uiStroke.Parent = val6
+  local uiGradient = Instance.new("UIGradient")
+  uiGradient.Color = colorSequence
+  uiGradient.Parent = uiStroke
+  val5(uiGradient)
+  return uiStroke
+end
+
+val5 = function(p4)
+  task.spawn(function()
+    local val8 = 0
+    while true do
+      if p4 and p4.Parent then
+        val8 = (val8 + 2) % 360
+        p4.Rotation = val8
+        task.wait(0.015)
+      else
+        break
+      end
+    end
+    return
+  end)
+  return
+end
+
+local val9 = function(p5, p6, p7)
+  local create = tweenService:Create(p5, p6, p7)
+  create:Play()
+  return create
+end
+
+local function helper(val10)
+  local function helper2(val11)
+    local element3 = val11.Position - position
+    val10.Position = UDim2.new(
+      position2.X.Scale, position2.X.Offset + element3.X, position2.Y.Scale, position2.Y.Offset + element3.Y
+    )
+    return
+  end
+  local val12
+  val10.InputBegan:Connect(function(input)
+    local val13 = input.UserInputType == Enum.UserInputType.MouseButton1
+      or input.UserInputType == Enum.UserInputType.Touch
+    if val13 then
+      val12 = true
+      position = input.Position
+      position2 = val10.Position
+      input.Changed:Connect(function()
+        if input.UserInputState == Enum.UserInputState.End then
+          val12 = false
+        end
+        return
+      end)
+    end
+    return
+  end)
+  local val14
+  val10.InputChanged:Connect(function(input2)
+    if input2.UserInputType == Enum.UserInputType.MouseMovement
+      or input2.UserInputType == Enum.UserInputType.Touch then
+      val14 = input2
+    end
+    return
+  end)
+  userInputService.InputChanged:Connect(function(input3)
+    if input3 == val14 and val12 then
+      helper2(input3)
+    end
+    return
+  end)
+  return
+end
+
+local val15
+
+task.spawn(function()
+  local val16, success = pcall(function()
+    return game:GetObjects("rbxassetid://139607718")
+  end)
+  local val17 = val16
+  if val16 then
+    val17 = success and success[1]
+  end
+  if val17 then
+    val15 = success[1]
+  end
+  return
+end)
+
+-- ===== MAIN FRAME (Dark brown/black for bee theme) =====
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 280, 0, 260)
+mainFrame.Position = UDim2.new(0.5, -140, 0.5, -130)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 20, 0) -- dark honey
+mainFrame.BackgroundTransparency = 0.55
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = pinokioScriptsKorblox3
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = mainFrame
+
+createUIStroke(mainFrame, 2.5)
+helper(mainFrame)
+
+local uiListLayout = Instance.new("UIListLayout")
+uiListLayout.FillDirection = Enum.FillDirection.Vertical
+uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+uiListLayout.Padding = UDim.new(0, 12)
+uiListLayout.Parent = mainFrame
+
+local uiPadding = Instance.new("UIPadding")
+uiPadding.PaddingLeft = UDim.new(0, 15)
+uiPadding.PaddingRight = UDim.new(0, 15)
+uiPadding.PaddingTop = UDim.new(0, 15)
+uiPadding.PaddingBottom = UDim.new(0, 15)
+uiPadding.Parent = mainFrame
+
+local headerFrame = Instance.new("Frame")
+headerFrame.Name = "HeaderFrame"
+headerFrame.Size = UDim2.new(1, 0, 0, 25)
+headerFrame.BackgroundTransparency = 1
+headerFrame.LayoutOrder = 1
+headerFrame.Parent = mainFrame
+
+-- ===== TITLE CHANGED TO BEE HUB =====
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(1, -30, 1, 0)
+textLabel.Position = UDim2.new(0, 0, 0, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.Text = "BEE HUB 🐝🍯"
+textLabel.TextColor3 = Color3.fromRGB(255, 255, 0) -- Yellow
+textLabel.Font = Enum.Font.GothamBold
+textLabel.TextSize = 17
+textLabel.TextXAlignment = Enum.TextXAlignment.Left
+textLabel.Parent = headerFrame
+
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Name = "MinimizeButton"
+minimizeButton.Size = UDim2.new(0, 25, 0, 25)
+minimizeButton.Position = UDim2.new(1, 0, 0.5, 0)
+minimizeButton.AnchorPoint = Vector2.new(1, 0.5)
+minimizeButton.BackgroundTransparency = 1
+minimizeButton.Text = "-"
+minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 0)
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.TextSize = 20
+minimizeButton.Parent = headerFrame
+
+local minimizedIcon = Instance.new("TextButton")
+minimizedIcon.Name = "MinimizedIcon"
+minimizedIcon.Size = UDim2.new(0, 46, 0, 46)
+minimizedIcon.Position = mainFrame.Position
+minimizedIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+minimizedIcon.BackgroundColor3 = Color3.fromRGB(25, 20, 0)
+minimizedIcon.BackgroundTransparency = 0.55
+minimizedIcon.BorderSizePixel = 0
+minimizedIcon.Text = "🐝"
+minimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 0)
+minimizedIcon.Font = Enum.Font.GothamBold
+minimizedIcon.TextSize = 22
+minimizedIcon.Visible = false
+minimizedIcon.Parent = pinokioScriptsKorblox3
+
+local uiCorner2 = Instance.new("UICorner")
+uiCorner2.CornerRadius = UDim.new(0, 12)
+uiCorner2.Parent = minimizedIcon
+
+createUIStroke(minimizedIcon, 2)
+helper(minimizedIcon)
+
+local function helper3(val18)
+  local val19 = val18 and 1 or 0.55
+  local val20 = val18 and 1 or 0.75
+  local transparency = val18 and 1 or 0
+  local textTransparency = val18 and 1 or 0
+  local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+  if val18 then
+    minimizedIcon.Position = mainFrame.Position
+  else
+    mainFrame.Visible = true
+    mainFrame.Position = minimizedIcon.Position
+  end
+
+  for index3, value3 in ipairs(mainFrame:GetDescendants()) do
+    if (value3:IsA("Frame")) and value3 ~= headerFrame then
+      val9(value3, tweenInfo, { BackgroundTransparency = value3 == mainFrame and val19 or val20 })
+    else
+      if (value3:IsA("TextButton")) then
+        val9(value3, tweenInfo, {
+          BackgroundTransparency = val20, TextTransparency = textTransparency, })
+      else
+        if (value3:IsA("TextLabel")) then
+          val9(value3, tweenInfo, { TextTransparency = textTransparency })
+        else
+          if (value3:IsA("UIStroke")) then
+            val9(value3, tweenInfo, { Transparency = transparency })
+          end
+        end
+      end
+    end
+  end
+
+  local uiStroke2 = mainFrame:FindFirstChildOfClass("UIStroke")
+  if uiStroke2 then
+    val9(uiStroke2, tweenInfo, { Transparency = transparency })
+  end
+
+  val9(mainFrame, tweenInfo, { BackgroundTransparency = val19 }).Completed:Connect(function()
+    if val18 then
+      mainFrame.Visible = false
+      minimizedIcon.Visible = true
+      minimizedIcon.BackgroundTransparency = 1
+      minimizedIcon.TextTransparency = 1
+      local uiStroke3 = minimizedIcon:FindFirstChildOfClass("UIStroke")
+      if uiStroke3 then
+        uiStroke3.Transparency = 1
+      end
+      val9(minimizedIcon, tweenInfo, { BackgroundTransparency = 0.55 })
+      val9(minimizedIcon, tweenInfo, { TextTransparency = 0 })
+      if uiStroke3 then
+        val9(uiStroke3, tweenInfo, { Transparency = 0 })
+      end
+    end
+    return
+  end)
+
+  if not val18 then
+    local uiStroke4 = minimizedIcon:FindFirstChildOfClass("UIStroke")
+    val9(minimizedIcon, tweenInfo, { BackgroundTransparency = 1 })
+    val9(minimizedIcon, tweenInfo, { TextTransparency = 1 })
+    if uiStroke4 then
+      val9(uiStroke4, tweenInfo, { Transparency = 1 })
+    end
+    task.wait(0.3)
+    minimizedIcon.Visible = false
+  end
+  return
+end
+
+minimizeButton.MouseButton1Click:Connect(function()
+  helper3(true)
+  return
+end)
+
+minimizedIcon.MouseButton1Click:Connect(function()
+  helper3(false)
+  return
+end)
+
+local connect, val21
+
+local function helper4()
+  if connect then
+    connect:Disconnect()
+  end
+  connect = localPlayer.CharacterAdded:Connect(function(character2)
+    if val then
+      if (character2:WaitForChild("Humanoid", 10)) then
+        task.wait(0.5)
+        if val then
+          val21(character2)
+        end
+      end
+    end
+    return
+  end)
+  return
+end
+
+val21 = function(p11)
+  local val22, val23, val24, val25
+  if not p11 then
+    return
+  else
+    local humanoid = p11:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+      return
+    else
+      iterate(p11)
+      if humanoid.RigType.Name == "R15" then
+        if not val15 then
+          local success2, val26
+          val26, success2 = pcall(function()
+            return game:GetObjects("rbxassetid://139607718")
+          end)
+          local val27 = val26
+          if val26 then
+            val27 = success2 and success2[1]
+          end
+          if val27 then
+            val15 = success2[1]
+            ::L12315892::
+            bodyHeightScale = humanoid:FindFirstChild("BodyHeightScale")
+            val22 = bodyHeightScale
+            value4 = bodyHeightScale and humanoid.BodyHeightScale.Value or 1
+            bodyWidthScale = humanoid:FindFirstChild("BodyWidthScale")
+            val23 = bodyWidthScale
+            value5 = bodyWidthScale and humanoid.BodyWidthScale.Value or 1
+            bodyDepthScale = humanoid:FindFirstChild("BodyDepthScale")
+            val24 = bodyDepthScale
+            value6 = bodyDepthScale and humanoid.BodyDepthScale.Value or 1
+            val25 = {}
+            for index4, value7 in ipairs(val15:GetDescendants()) do
+              local meshPart = value7:IsA("MeshPart")
+              local val28 = meshPart
+              if meshPart then
+                local val29 = value7.Name == "RightUpperLeg"
+                local val30 = val29
+                if not val29 then
+                  val30 = value7.Name == "RightLowerLeg" or value7.Name == "RightFoot"
+                end
+                val28 = val30
+              end
+              if val28 then
+                val25[value7.Name] = value7
+              end
+            end
+            for index5, value8 in ipairs({ "RightUpperLeg", "RightLowerLeg", "RightFoot" }) do
+              local findFirstChild2 = p11:FindFirstChild(value8)
+              local element4 = val25[value8]
+              if findFirstChild2 and element4 then
+                findFirstChild2.Transparency = 1
+                local clone = element4:Clone()
+                clone.Name = "Korblox_" .. value8
+                clone.CanCollide = false
+                clone.Size = Vector3.new(
+                  element4.Size.X * value5, element4.Size.Y * value4, element4.Size.Z * value6
+                )
+                clone.CFrame = findFirstChild2.CFrame
+                clone.Parent = p11
+                local korbloxWeld = Instance.new("WeldConstraint")
+                korbloxWeld.Name = "Korblox_Weld"
+                korbloxWeld.Part0 = findFirstChild2
+                korbloxWeld.Part1 = clone
+                korbloxWeld.Parent = clone
+              end
+            end
+            ::L1639180::
+            return
+          else
+            warn("Failed to retrieve Korblox Right Leg asset.")
+            return
+          end
+        else
+          goto L12315892
+        end
+      else
+        local rightLeg2 = p11:FindFirstChild("Right Leg")
+        if rightLeg2 then
+          if not (rightLeg2:FindFirstChild("Korblox_OriginalColor")) then
+            local korbloxOriginalColor2 = Instance.new("Color3Value")
+            korbloxOriginalColor2.Name = "Korblox_OriginalColor"
+            korbloxOriginalColor2.Value = rightLeg2.Color
+            korbloxOriginalColor2.Parent = rightLeg2
+          end
+          for index6, value9 in ipairs(p11:GetChildren()) do
+            local characterMesh2 = value9:IsA("CharacterMesh")
+            local val31 = characterMesh2
+            if characterMesh2 then
+              val31 = value9.BodyPart == Enum.BodyPart.RightLeg or value9.BodyPart.Value == 5
+            end
+            if val31 then
+              local korbloxSavedMesh2 = value9:Clone()
+              korbloxSavedMesh2.Name = "Korblox_SavedMesh"
+              korbloxSavedMesh2.Parent = rightLeg2
+              value9:Destroy()
+            end
+          end
+          for index7, value10 in ipairs(rightLeg2:GetChildren()) do
+            if (value10:IsA("SpecialMesh")) and value10.Name ~= "Korblox_Mesh" then
+              local korbloxSavedSpecialMesh2 = value10:Clone()
+              korbloxSavedSpecialMesh2.Name = "Korblox_SavedSpecialMesh"
+              korbloxSavedSpecialMesh2.Parent = rightLeg2
+              value10:Destroy()
+            end
+          end
+          rightLeg2.Color = Color3.fromRGB(64, 64, 64)
+          local korbloxMesh2 = Instance.new("SpecialMesh")
+          korbloxMesh2.Name = "Korblox_Mesh"
+          korbloxMesh2.MeshType = Enum.MeshType.FileMesh
+          korbloxMesh2.MeshId = "rbxassetid://101851696"
+          korbloxMesh2.TextureId = "rbxassetid://101851254"
+          korbloxMesh2.Scale = Vector3.new(1, 1, 1)
+          korbloxMesh2.Parent = rightLeg2
+        end
+        goto L1639180
+      end
+    end
+  end
+end
+
+-- ===== EQUIP BUTTON (Yellow theme) =====
+local equipButton = Instance.new("TextButton")
+equipButton.Name = "EquipButton"
+equipButton.Size = UDim2.new(1, 0, 0, 38)
+equipButton.BackgroundColor3 = Color3.fromRGB(80, 70, 0) -- dark yellow
+equipButton.BackgroundTransparency = 0.75
+equipButton.Text = "Equip Korblox"
+equipButton.TextColor3 = Color3.fromRGB(255, 255, 0) -- Yellow text
+equipButton.Font = Enum.Font.GothamMedium
+equipButton.TextSize = 14
+equipButton.LayoutOrder = 2
+equipButton.Parent = mainFrame
+
+local uiCorner3 = Instance.new("UICorner")
+uiCorner3.CornerRadius = UDim.new(0, 8)
+uiCorner3.Parent = equipButton
+
+createUIStroke(equipButton, 1.5)
+
+equipButton.MouseButton1Click:Connect(function()
+  val = not val
+  local character3 = localPlayer.Character
+  if val then
+    equipButton.Text = "Unequip Korblox"
+    if character3 then
+      val21(character3)
+    end
+    helper4()
+  else
+    equipButton.Text = "Equip Korblox"
+    if character3 then
+      iterate(character3)
+    end
+    if connect then
+      connect:Disconnect()
+      connect = nil
+    end
+  end
+  return
+end)
+
+-- ===== DISCORD BUTTON (Yellow theme) =====
+local discordButton = Instance.new("TextButton")
+discordButton.Name = "DiscordButton"
+discordButton.Size = UDim2.new(1, 0, 0, 38)
+discordButton.BackgroundColor3 = Color3.fromRGB(80, 70, 0)
+discordButton.BackgroundTransparency = 0.75
+discordButton.Text = "Join Community Discord"
+discordButton.TextColor3 = Color3.fromRGB(255, 255, 0)
+discordButton.Font = Enum.Font.GothamMedium
+discordButton.TextSize = 14
+discordButton.LayoutOrder = 3
+discordButton.Parent = mainFrame
+
+local uiCorner4 = Instance.new("UICorner")
+uiCorner4.CornerRadius = UDim.new(0, 8)
+uiCorner4.Parent = discordButton
+
+createUIStroke(discordButton, 1.5)
+
+discordButton.MouseButton1Click:Connect(function()
+  local val32 = setclipboard or toclipboard
+  if val32 then
+    pcall(function()
+      val32("https://discord.gg/t6rhaAZvhG")
+      return
+    end)
+    discordButton.Text = "Link Copied! 🐝"
+  else
+    discordButton.Text = "Failed to copy link"
+  end
+  task.delay(2, function()
+    discordButton.Text = "Join Community Discord"
+    return
+  end)
+  return
+end)
+
+-- ===== UNLOAD BUTTON (Yellow theme - darker) =====
+local unloadButton = Instance.new("TextButton")
+unloadButton.Name = "UnloadButton"
+unloadButton.Size = UDim2.new(1, 0, 0, 38)
+unloadButton.BackgroundColor3 = Color3.fromRGB(120, 100, 0) -- darker gold
+unloadButton.BackgroundTransparency = 0.75
+unloadButton.Text = "Unload Script"
+unloadButton.TextColor3 = Color3.fromRGB(255, 255, 0)
+unloadButton.Font = Enum.Font.GothamMedium
+unloadButton.TextSize = 14
+unloadButton.LayoutOrder = 4
+unloadButton.Parent = mainFrame
+
+local uiCorner5 = Instance.new("UICorner")
+uiCorner5.CornerRadius = UDim.new(0, 8)
+uiCorner5.Parent = unloadButton
+
+createUIStroke(unloadButton, 1.5)
+
+unloadButton.MouseButton1Click:Connect(function()
+  local character4 = localPlayer.Character
+  if character4 then
+    iterate(character4)
+  end
+  if connect then
+    connect:Disconnect()
+  end
+  val = false
+  local tweenInfo2 = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+  for index8, value11 in ipairs(pinokioScriptsKorblox3:GetDescendants()) do
+    if (value11:IsA("Frame")) then
+      val9(value11, tweenInfo2, { BackgroundTransparency = 1 })
+    else
+      local textLabel2 = value11:IsA("TextLabel")
+      if textLabel2 or value11:IsA("TextButton") then
+        val9(value11, tweenInfo2, { TextTransparency = 1, BackgroundTransparency = 1 })
+      else
+        if (value11:IsA("UIStroke")) then
+          val9(value11, tweenInfo2, { Transparency = 1 })
+        end
+      end
+    end
+  end
+  task.wait(0.4)
+  pinokioScriptsKorblox3:Destroy()
+  return
+end)
+
+-- ===== FOOTER TEXT (Yellow theme) =====
+local textLabel3 = Instance.new("TextLabel")
+textLabel3.Size = UDim2.new(1, 0, 0, 20)
+textLabel3.BackgroundTransparency = 1
+textLabel3.Text = "BEE HUB 🐝🍯"
+textLabel3.TextColor3 = Color3.fromRGB(255, 220, 0)
+textLabel3.Font = Enum.Font.GothamSemibold
+textLabel3.TextSize = 12
+textLabel3.LayoutOrder = 5
+textLabel3.Parent = mainFrame
+
+local function helper5(val33)
+  val33.MouseEnter:Connect(function()
+    val9(val33, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+      BackgroundTransparency = 0.55, })
+    return
+  end)
+  val33.MouseLeave:Connect(function()
+    val9(val33, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+      BackgroundTransparency = 0.75, })
+    return
+  end)
+  return
+end
+
+helper5(equipButton)
+helper5(discordButton)
+helper5(unloadButton)
+
+minimizeButton.MouseEnter:Connect(function()
+  val9(minimizeButton, TweenInfo.new(0.2), { TextColor3 = (Color3.fromRGB(255, 255, 0)) })
+  return
+end)
+
+minimizeButton.MouseLeave:Connect(function()
+  val9(minimizeButton, TweenInfo.new(0.2), { TextColor3 = (Color3.fromRGB(255, 220, 0)) })
+  return
+end)
+
+minimizedIcon.MouseEnter:Connect(function()
+  val9(minimizedIcon, TweenInfo.new(0.2), { BackgroundTransparency = 0.4 })
+  return
+end)
+
+minimizedIcon.MouseLeave:Connect(function()
+  val9(minimizedIcon, TweenInfo.new(0.2), { BackgroundTransparency = 0.55 })
+  return
+end)
+
+-- ===== NOTIFICATION (Yellow theme) =====
+task.spawn(function()
+  local pinokioScriptsNotification = Instance.new("ScreenGui")
+  pinokioScriptsNotification.Name = "PinokioScripts_Notification"
+  pinokioScriptsNotification.Parent = coreGui2
+
+  local frame = Instance.new("Frame")
+  frame.Size = UDim2.new(0, 320, 0, 50)
+  frame.Position = UDim2.new(0.5, 0, 0, -80)
+  frame.AnchorPoint = Vector2.new(0.5, 0)
+  frame.BackgroundColor3 = Color3.fromRGB(25, 20, 0)
+  frame.BackgroundTransparency = 0.55
+  frame.BorderSizePixel = 0
+  frame.Parent = pinokioScriptsNotification
+
+  local uiCorner6 = Instance.new("UICorner")
+  uiCorner6.CornerRadius = UDim.new(0, 10)
+  uiCorner6.Parent = frame
+
+  createUIStroke(frame, 2)
+
+  local textLabel4 = Instance.new("TextLabel")
+  textLabel4.Size = UDim2.new(1, 0, 1, 0)
+  textLabel4.BackgroundTransparency = 1
+  textLabel4.Text = "Welcome to BEE HUB 🐝🍯"
+  textLabel4.TextColor3 = Color3.fromRGB(255, 255, 0)
+  textLabel4.Font = Enum.Font.GothamBold
+  textLabel4.TextSize = 13
+  textLabel4.Parent = frame
+
+  val9(frame, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    Position = (UDim2.new(0.5, 0, 0, 30)), })
+
+  task.wait(4)
+
+  val9(frame, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+    Position = (UDim2.new(0.5, 0, 0, -80)), }).Completed:Connect(function()
+    pinokioScriptsNotification:Destroy()
+    return
+  end)
+  return
+end)
