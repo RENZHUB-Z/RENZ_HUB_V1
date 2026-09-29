@@ -1,0 +1,677 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local Overlay = {
+    model = nil,
+    hrp = nil,
+    weld = nil,
+    renderConn = nil,
+    motorPairs = {},
+    paused = false,
+    hideSelf = false,
+    hiddenParts = {},
+    hideConn = nil,
+    hideEnforceConn = nil,
+    lastUserId = nil,
+    lastUsername = nil,
+    minimized = false,
+}
+
+local function getChar()
+    return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+end
+
+local function getHRP(char)
+    return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+local function getOverlayFolder()
+    local cam = workspace.CurrentCamera
+    if not cam then return nil end
+    local folder = cam:FindFirstChild("_LocalOverlay")
+    if not folder then
+        folder = Instance.new("Folder")
+        folder.Name = "_LocalOverlay"
+        folder.Parent = cam
+    end
+    return folder
+end
+
+local function clearMotorPairs()
+    table.clear(Overlay.motorPairs)
+end
+
+local function stopRender()
+    if Overlay.renderConn then
+        Overlay.renderConn:Disconnect()
+        Overlay.renderConn = nil
+    end
+end
+
+function destroyOverlay()
+    stopRender()
+    clearMotorPairs()
+    if Overlay.model then pcall(function() Overlay.model:Destroy() end) end
+    Overlay.model, Overlay.hrp, Overlay.weld = nil, nil, nil
+    Overlay.lastUserId, Overlay.lastUsername = nil, nil
+end
+
+local function stopHideHooks()
+    if Overlay.hideConn then Overlay.hideConn:Disconnect() Overlay.hideConn = nil end
+    if Overlay.hideEnforceConn then Overlay.hideEnforceConn:Disconnect() Overlay.hideEnforceConn = nil end
+end
+
+local function applyHideToParts(char)
+    if not Overlay.hideSelf then return end
+    for _, inst in ipairs(char:GetDescendants()) do
+        if inst:IsA("BasePart") then
+            if Overlay.hiddenParts[inst] == nil then
+                Overlay.hiddenParts[inst] = inst.LocalTransparencyModifier
+            end
+            inst.LocalTransparencyModifier = 1
+        elseif inst:IsA("Decal") or inst:IsA("Texture") then
+            if Overlay.hiddenParts[inst] == nil then
+                Overlay.hiddenParts[inst] = inst.Transparency
+            end
+            inst.Transparency = 1
+        end
+    end
+end
+
+local function restoreParts()
+    for inst, prev in pairs(Overlay.hiddenParts) do
+        if inst and inst.Parent then
+            if inst:IsA("BasePart") then
+                inst.LocalTransparencyModifier = prev
+            elseif inst:IsA("Decal") or inst:IsA("Texture") then
+                inst.Transparency = prev
+            end
+        end
+    end
+    table.clear(Overlay.hiddenParts)
+end
+
+function setLocalHideSelf(enabled)
+    Overlay.hideSelf = enabled
+    local char = LocalPlayer.Character
+    if not char then return end
+
+    stopHideHooks()
+    restoreParts()
+
+    if not enabled then return end
+
+    applyHideToParts(char)
+
+    Overlay.hideConn = char.DescendantAdded:Connect(function(inst)
+        if not Overlay.hideSelf then return end
+        if inst:IsA("BasePart") then
+            if Overlay.hiddenParts[inst] == nil then
+                Overlay.hiddenParts[inst] = inst.LocalTransparencyModifier
+            end
+            inst.LocalTransparencyModifier = 1
+        elseif inst:IsA("Decal") or inst:IsA("Texture") then
+            if Overlay.hiddenParts[inst] == nil then
+                Overlay.hiddenParts[inst] = inst.Transparency
+            end
+            inst.Transparency = 1
+        end
+    end)
+
+    local acc = 0
+    Overlay.hideEnforceConn = RunService.RenderStepped:Connect(function(dt)
+        if not Overlay.hideSelf then return end
+        acc += dt
+        if acc < 0.1 then return end
+        acc = 0
+        local c = LocalPlayer.Character
+        if c then applyHideToParts(c) end
+    end)
+end
+
+local function prepareModel(model)
+    for _, d in ipairs(model:GetDescendants()) do
+        if d:IsA("Script") or d:IsA("LocalScript") then d.Disabled = true end
+        if d:IsA("BasePart") then
+            d.CanCollide = false
+            d.CanTouch = false
+            d.CanQuery = false
+            d.Massless = true
+        end
+    end
+    local hum = model:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum.PlatformStand = true
+        hum.AutoRotate = false
+        hum.Sit = true
+        hum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+    end
+    return model
+end
+
+local function motorKey(m)
+    local p0 = (m.Part0 and m.Part0.Name) or "nil"
+    local p1 = (m.Part1 and m.Part1.Name) or "nil"
+    return m.Name .. "|" .. p0 .. ">" .. p1
+end
+
+local function buildMotorPairs(sourceChar, targetModel)
+    clearMotorPairs()
+    local srcMap = {}
+    for _, d in ipairs(sourceChar:GetDescendants()) do
+        if d:IsA("Motor6D") then srcMap[motorKey(d)] = d end
+    end
+    local tgtMap = {}
+    for _, d in ipairs(targetModel:GetDescendants()) do
+        if d:IsA("Motor6D") then tgtMap[motorKey(d)] = d end
+    end
+    for k, src in pairs(srcMap) do
+        local tgt = tgtMap[k]
+        if tgt then table.insert(Overlay.motorPairs, { src = src, tgt = tgt }) end
+    end
+end
+
+local function startPoseMirrorLoop()
+    stopRender()
+    Overlay.renderConn = RunService.RenderStepped:Connect(function()
+        if Overlay.paused then return end
+        if not Overlay.model or not Overlay.hrp then return end
+        for _, pair in ipairs(Overlay.motorPairs) do
+            local src, tgt = pair.src, pair.tgt
+            if src and tgt and src.Parent and tgt.Parent then
+                tgt.Transform = src.Transform
+            end
+        end
+    end)
+end
+
+local function resolveTarget(text)
+    text = tostring(text or ""):gsub("^%s+", ""):gsub("%s+$", "")
+    if text == "" then return false, "Input empty." end
+
+    local asNumber = tonumber(text)
+    if asNumber then
+        local uid = math.floor(asNumber)
+        if uid <= 0 then return false, "Invalid UserId." end
+        local okName, uname = pcall(function()
+            return Players:GetNameFromUserIdAsync(uid)
+        end)
+        if not okName or not uname then return false, "UserId not found." end
+        return true, uid, uname
+    end
+
+    local okId, uid = pcall(function()
+        return Players:GetUserIdFromNameAsync(text)
+    end)
+    if not okId or not uid or uid == 0 then return false, "Username not found." end
+    return true, uid, text
+end
+
+function spawnOverlay(userId, username, statusFn)
+    statusFn("Spawning overlay...")
+    destroyOverlay()
+
+    local okModel, modelOrErr = pcall(function()
+        return Players:CreateHumanoidModelFromUserIdAsync(userId)
+    end)
+    if not okModel or typeof(modelOrErr) ~= "Instance" then
+        statusFn("Failed to create avatar.")
+        return false
+    end
+
+    local model = prepareModel(modelOrErr)
+    model.Name = "Overlay_" .. tostring(userId)
+
+    local folder = getOverlayFolder()
+    if not folder then
+        model:Destroy()
+        statusFn("Camera not ready.")
+        return false
+    end
+    model.Parent = folder
+
+    local ohrp = model:FindFirstChild("HumanoidRootPart")
+    if not ohrp or not ohrp:IsA("BasePart") then
+        model:Destroy()
+        statusFn("Overlay HRP missing.")
+        return false
+    end
+
+    local myChar = getChar()
+    local myHRP = getHRP(myChar)
+    if not myHRP then
+        model:Destroy()
+        statusFn("Your HRP not ready.")
+        return false
+    end
+
+    model:PivotTo(myHRP.CFrame)
+
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = ohrp
+    weld.Part1 = myHRP
+    weld.Parent = ohrp
+
+    Overlay.model, Overlay.hrp, Overlay.weld = model, ohrp, weld
+    Overlay.lastUserId, Overlay.lastUsername = userId, username
+    Overlay.paused = false
+
+    buildMotorPairs(myChar, model)
+    startPoseMirrorLoop()
+
+    statusFn(("Overlay ON: %s (%d)"):format(username, userId))
+    return true
+end
+
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(0.25)
+    if Overlay.hideSelf then setLocalHideSelf(true) end
+    if Overlay.lastUserId then
+        spawnOverlay(Overlay.lastUserId, Overlay.lastUsername or tostring(Overlay.lastUserId), function() end)
+    end
+end)
+
+local pg = LocalPlayer:WaitForChild("PlayerGui")
+local old = pg:FindFirstChild("BeeOverlayGui")
+if old then old:Destroy() end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "BeeOverlayGui"
+gui.ResetOnSpawn = false
+gui.Parent = pg
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 380, 0, 240)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.BackgroundColor3 = Color3.fromRGB(28, 22, 8)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.ClipsDescendants = true
+frame.BackgroundTransparency = 0
+local frameCorner = Instance.new("UICorner", frame)
+frameCorner.CornerRadius = UDim.new(0, 14)
+
+local border = Instance.new("Frame", frame)
+border.Size = UDim2.new(1, 2, 1, 2)
+border.Position = UDim2.new(0, -1, 0, -1)
+border.BackgroundTransparency = 1
+border.BorderSizePixel = 2
+border.BorderColor3 = Color3.fromRGB(255, 200, 30)
+local borderCorner = Instance.new("UICorner", border)
+borderCorner.CornerRadius = UDim.new(0, 15)
+
+local header = Instance.new("Frame", frame)
+header.Size = UDim2.new(1, 0, 0, 44)
+header.Position = UDim2.new(0, 0, 0, 0)
+header.BackgroundTransparency = 1
+header.BorderSizePixel = 0
+header.Active = true
+
+local title = Instance.new("TextLabel", header)
+title.Size = UDim2.new(1, -80, 1, 0)
+title.Position = UDim2.new(0, 44, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "BEE HUB 🐝🍯 | PREMIUM 👑"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 215, 50)
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local icon = Instance.new("ImageLabel", header)
+icon.Size = UDim2.new(0, 24, 0, 24)
+icon.Position = UDim2.new(0, 12, 0.5, -12)
+icon.BackgroundTransparency = 1
+icon.Image = "rbxassetid://7072721207"
+icon.ImageColor3 = Color3.fromRGB(255, 200, 40)
+
+local divider = Instance.new("Frame", frame)
+divider.Size = UDim2.new(0.9, 0, 0, 2)
+divider.Position = UDim2.new(0.05, 0, 0, 44)
+divider.BackgroundColor3 = Color3.fromRGB(255, 200, 30)
+divider.BorderSizePixel = 0
+
+local minimizeBtn = Instance.new("TextButton", header)
+minimizeBtn.Size = UDim2.new(0, 32, 0, 32)
+minimizeBtn.Position = UDim2.new(1, -72, 0.5, -16)
+minimizeBtn.Text = "−"
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 24
+minimizeBtn.TextColor3 = Color3.fromRGB(240, 225, 160)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(55, 45, 12)
+minimizeBtn.BorderSizePixel = 0
+local minCorner = Instance.new("UICorner", minimizeBtn)
+minCorner.CornerRadius = UDim.new(0, 6)
+minimizeBtn.MouseEnter:Connect(function()
+    minimizeBtn.BackgroundColor3 = Color3.fromRGB(85, 70, 20)
+    minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
+minimizeBtn.MouseLeave:Connect(function()
+    minimizeBtn.BackgroundColor3 = Color3.fromRGB(55, 45, 12)
+    minimizeBtn.TextColor3 = Color3.fromRGB(240, 225, 160)
+end)
+
+local closeBtn = Instance.new("TextButton", header)
+closeBtn.Size = UDim2.new(0, 32, 0, 32)
+closeBtn.Position = UDim2.new(1, -36, 0.5, -16)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.SourceSansBold
+closeBtn.TextSize = 20
+closeBtn.TextColor3 = Color3.fromRGB(255, 220, 80)
+closeBtn.BackgroundColor3 = Color3.fromRGB(60, 45, 10)
+closeBtn.BorderSizePixel = 0
+local closeCorner = Instance.new("UICorner", closeBtn)
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeBtn.MouseEnter:Connect(function()
+    closeBtn.BackgroundColor3 = Color3.fromRGB(150, 110, 20)
+    closeBtn.TextColor3 = Color3.fromRGB(255, 240, 150)
+end)
+closeBtn.MouseLeave:Connect(function()
+    closeBtn.BackgroundColor3 = Color3.fromRGB(60, 45, 10)
+    closeBtn.TextColor3 = Color3.fromRGB(255, 220, 80)
+end)
+
+local inputBox = Instance.new("TextBox", frame)
+inputBox.Size = UDim2.new(1, -30, 0, 38)
+inputBox.Position = UDim2.new(0, 15, 0, 54)
+inputBox.BackgroundColor3 = Color3.fromRGB(45, 38, 12)
+inputBox.BorderSizePixel = 0
+inputBox.Text = ""
+inputBox.PlaceholderText = "Username or UserId..."
+inputBox.PlaceholderColor3 = Color3.fromRGB(180, 150, 70)
+inputBox.Font = Enum.Font.Gotham
+inputBox.TextSize = 15
+inputBox.TextColor3 = Color3.fromRGB(250, 235, 180)
+inputBox.ClearTextOnFocus = false
+local inpCorner = Instance.new("UICorner", inputBox)
+inpCorner.CornerRadius = UDim.new(0, 8)
+inputBox.Focused:Connect(function()
+    inputBox.BackgroundColor3 = Color3.fromRGB(58, 48, 15)
+end)
+inputBox.FocusLost:Connect(function()
+    inputBox.BackgroundColor3 = Color3.fromRGB(45, 38, 12)
+end)
+
+local spawnBtn = Instance.new("TextButton", frame)
+spawnBtn.Size = UDim2.new(0.28, -6, 0, 38)
+spawnBtn.Position = UDim2.new(0, 15, 0, 104)
+spawnBtn.Text = "SPAWN"
+spawnBtn.Font = Enum.Font.GothamBold
+spawnBtn.TextSize = 14
+spawnBtn.TextColor3 = Color3.fromRGB(30, 20, 0)
+spawnBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 30)
+spawnBtn.BorderSizePixel = 0
+local btnCorner1 = Instance.new("UICorner", spawnBtn)
+btnCorner1.CornerRadius = UDim.new(0, 8)
+spawnBtn.MouseEnter:Connect(function()
+    spawnBtn.BackgroundColor3 = Color3.fromRGB(255, 225, 70)
+end)
+spawnBtn.MouseLeave:Connect(function()
+    spawnBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 30)
+end)
+
+local removeBtn = Instance.new("TextButton", frame)
+removeBtn.Size = UDim2.new(0.28, -6, 0, 38)
+removeBtn.Position = UDim2.new(0.36, 6, 0, 104)
+removeBtn.Text = "REMOVE"
+removeBtn.Font = Enum.Font.GothamBold
+removeBtn.TextSize = 14
+removeBtn.TextColor3 = Color3.fromRGB(255, 235, 170)
+removeBtn.BackgroundColor3 = Color3.fromRGB(120, 90, 15)
+removeBtn.BorderSizePixel = 0
+local btnCorner2 = Instance.new("UICorner", removeBtn)
+btnCorner2.CornerRadius = UDim.new(0, 8)
+removeBtn.MouseEnter:Connect(function()
+    removeBtn.BackgroundColor3 = Color3.fromRGB(160, 120, 20)
+end)
+removeBtn.MouseLeave:Connect(function()
+    removeBtn.BackgroundColor3 = Color3.fromRGB(120, 90, 15)
+end)
+
+local pauseBtn = Instance.new("TextButton", frame)
+pauseBtn.Size = UDim2.new(0.28, -6, 0, 38)
+pauseBtn.Position = UDim2.new(0.72, -15, 0, 104)
+pauseBtn.Text = "⏸ PAUSE"
+pauseBtn.Font = Enum.Font.GothamBold
+pauseBtn.TextSize = 14
+pauseBtn.TextColor3 = Color3.fromRGB(30, 20, 0)
+pauseBtn.BackgroundColor3 = Color3.fromRGB(230, 170, 20)
+pauseBtn.BorderSizePixel = 0
+local btnCorner3 = Instance.new("UICorner", pauseBtn)
+btnCorner3.CornerRadius = UDim.new(0, 8)
+pauseBtn.MouseEnter:Connect(function()
+    pauseBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 40)
+end)
+pauseBtn.MouseLeave:Connect(function()
+    pauseBtn.BackgroundColor3 = Color3.fromRGB(230, 170, 20)
+end)
+
+local bottomFrame = Instance.new("Frame", frame)
+bottomFrame.Size = UDim2.new(1, -30, 0, 70)
+bottomFrame.Position = UDim2.new(0, 15, 0, 154)
+bottomFrame.BackgroundTransparency = 1
+
+local hideToggle = Instance.new("TextButton", bottomFrame)
+hideToggle.Size = UDim2.new(0.48, 0, 0, 32)
+hideToggle.Position = UDim2.new(0, 0, 0, 0)
+hideToggle.Text = "👁 HIDE SELF: OFF"
+hideToggle.Font = Enum.Font.Gotham
+hideToggle.TextSize = 13
+hideToggle.TextColor3 = Color3.fromRGB(250, 235, 180)
+hideToggle.BackgroundColor3 = Color3.fromRGB(45, 38, 12)
+hideToggle.BorderSizePixel = 0
+local btnCorner4 = Instance.new("UICorner", hideToggle)
+btnCorner4.CornerRadius = UDim.new(0, 8)
+hideToggle.MouseEnter:Connect(function()
+    hideToggle.BackgroundColor3 = Color3.fromRGB(60, 50, 18)
+end)
+hideToggle.MouseLeave:Connect(function()
+    hideToggle.BackgroundColor3 = Color3.fromRGB(45, 38, 12)
+end)
+
+local statusLabel = Instance.new("TextLabel", bottomFrame)
+statusLabel.Size = UDim2.new(0.48, 0, 0, 32)
+statusLabel.Position = UDim2.new(0.52, 0, 0, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Ready"
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 12
+statusLabel.TextColor3 = Color3.fromRGB(210, 180, 110)
+statusLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+local statusDot = Instance.new("Frame", bottomFrame)
+statusDot.Size = UDim2.new(0, 8, 0, 8)
+statusDot.Position = UDim2.new(0.96, -12, 0.5, -4)
+statusDot.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+statusDot.BorderSizePixel = 0
+local dotCorner = Instance.new("UICorner", statusDot)
+dotCorner.CornerRadius = UDim.new(1, 0)
+
+-- ============================================================
+-- DRAG (on header bar) — with global fallback + touch support
+-- ============================================================
+local dragging = false
+local dragStart, startPos
+
+local function updateDrag(input)
+    if not dragging then return end
+    local delta = input.Position - dragStart
+    frame.Position = UDim2.new(
+        startPos.X.Scale, startPos.X.Offset + delta.X,
+        startPos.Y.Scale, startPos.Y.Offset + delta.Y
+    )
+end
+
+header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+header.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+    or input.UserInputType == Enum.UserInputType.Touch then
+        updateDrag(input)
+    end
+end)
+
+-- Fallback so drag continues even if the cursor leaves the header
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+    or input.UserInputType == Enum.UserInputType.Touch) then
+        updateDrag(input)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+-- ============================================================
+
+local function setStatus(msg)
+    statusLabel.Text = msg
+    if msg:find("ON") then
+        statusDot.BackgroundColor3 = Color3.fromRGB(255, 200, 30)
+    elseif msg:find("Paused") then
+        statusDot.BackgroundColor3 = Color3.fromRGB(255, 230, 120)
+    elseif msg:find("removed") or msg:find("Ready") then
+        statusDot.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    else
+        statusDot.BackgroundColor3 = Color3.fromRGB(255, 180, 30)
+    end
+end
+
+local function toggleMinimize()
+    Overlay.minimized = not Overlay.minimized
+
+    if Overlay.minimized then
+        minimizeBtn.Text = "+"
+        minimizeBtn.TextColor3 = Color3.fromRGB(180, 255, 100)
+
+        border.Visible = false
+        divider.Visible = false
+
+        local tween = TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 380, 0, 44)
+        })
+        tween:Play()
+        setStatus("Minimized")
+    else
+        minimizeBtn.Text = "−"
+        minimizeBtn.TextColor3 = Color3.fromRGB(240, 225, 160)
+
+        border.Visible = true
+        divider.Visible = true
+
+        local tween = TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 380, 0, 240)
+        })
+        tween:Play()
+
+        if Overlay.lastUsername then
+            setStatus("Overlay ON: " .. Overlay.lastUsername)
+        else
+            setStatus("Ready – type a name and press SPAWN")
+        end
+    end
+end
+
+minimizeBtn.MouseButton1Click:Connect(toggleMinimize)
+
+local function closeUI()
+
+    local fadeOut = TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 1
+    })
+    fadeOut:Play()
+
+    local borderFade = TweenService:Create(border, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 1
+    })
+    borderFade:Play()
+
+    local elementsToFade = {
+        title, icon, minimizeBtn, closeBtn, inputBox,
+        spawnBtn, removeBtn, pauseBtn, hideToggle, statusLabel, statusDot, divider
+    }
+
+    for _, element in ipairs(elementsToFade) do
+        if element and (element:IsA("TextLabel") or element:IsA("TextButton") or element:IsA("TextBox")) then
+            local fade = TweenService:Create(element, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                TextTransparency = 1
+            })
+            fade:Play()
+        elseif element and element:IsA("ImageLabel") then
+            local fade = TweenService:Create(element, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                ImageTransparency = 1
+            })
+            fade:Play()
+        elseif element and element:IsA("Frame") then
+            local fade = TweenService:Create(element, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = 1
+            })
+            fade:Play()
+        end
+    end
+
+    task.wait(0.35)
+    destroyOverlay()
+    gui:Destroy()
+    print("🐝 BEE HUB UI closed with animation")
+end
+
+closeBtn.MouseButton1Click:Connect(closeUI)
+
+spawnBtn.MouseButton1Click:Connect(function()
+    local text = inputBox.Text
+    local ok, uid, uname = resolveTarget(text)
+    if not ok then
+        setStatus("❌ " .. uid)
+        return
+    end
+    setLocalHideSelf(Overlay.hideSelf)
+    spawnOverlay(uid, uname, setStatus)
+end)
+
+inputBox.FocusLost:Connect(function(enter)
+    if enter then spawnBtn.MouseButton1Click:Fire() end
+end)
+
+removeBtn.MouseButton1Click:Connect(function()
+    destroyOverlay()
+    setStatus("🗑 Overlay removed")
+end)
+
+pauseBtn.MouseButton1Click:Connect(function()
+    Overlay.paused = not Overlay.paused
+    pauseBtn.Text = Overlay.paused and "▶ RESUME" or "⏸ PAUSE"
+    pauseBtn.BackgroundColor3 = Overlay.paused and Color3.fromRGB(60, 180, 60) or Color3.fromRGB(230, 170, 20)
+    setStatus(Overlay.paused and "⏸ Paused (frozen)" or "▶ Mirroring active")
+end)
+
+hideToggle.MouseButton1Click:Connect(function()
+    Overlay.hideSelf = not Overlay.hideSelf
+    setLocalHideSelf(Overlay.hideSelf)
+    hideToggle.Text = "👁 HIDE SELF: " .. (Overlay.hideSelf and "ON" or "OFF")
+    hideToggle.BackgroundColor3 = Overlay.hideSelf and Color3.fromRGB(60, 45, 10) or Color3.fromRGB(45, 38, 12)
+end)
+
+setLocalHideSelf(false)
+setStatus("✅ Ready – type a name and press SPAWN")
+print("🐝 BEE HUB 🍯 | PREMIUM 👑 loaded! (Draggable header)")
