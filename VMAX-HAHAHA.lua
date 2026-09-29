@@ -1,6 +1,3 @@
--- ==========================================
--- RENZ HUB INTRO SCRIPT - NEW LOGO 85660407447010
--- ==========================================
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
