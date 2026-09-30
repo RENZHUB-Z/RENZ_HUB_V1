@@ -1,6 +1,6 @@
--- RENZ HUB | MADE BY RENZ - WITH INTRO + AUTO PATCH
+-- RENZ HUB | MADE BY RENZ - V3 FIX
 
--- 1. INTRO MUNA (GREEN & BLUE)
+-- 1. INTRO
 local intro = Instance.new("ScreenGui")
 intro.Name = "RenzIntro"
 intro.Parent = game:GetService("CoreGui")
@@ -30,37 +30,44 @@ t2.Font = Enum.Font.GothamBold
 task.wait(3)
 intro:Destroy()
 
--- 2. LOAD ORIGINAL MADAMING SCRIPT
+-- 2. LOAD HUB
 loadstring(game:HttpGet("https://raw.githubusercontent.com/sabscrip-arch/srver/refs/heads/main/Stealanegg"))()
 
--- 3. AUTO PALIT NAME AT TANGGAL OWNER ( Paulit-ulit hahanapin for 10 sec )
+-- 3. SUPER PATCH - HAHABULIN NYA HABANG BUHAY YUNG TITLE AT OWNER
 task.spawn(function()
- for i=1,30 do
-  task.wait(0.5)
-  local places = {game:GetService("CoreGui"), game.Players.LocalPlayer:FindFirstChild("PlayerGui"), gethui and gethui() or nil}
-  for _,root in pairs(places) do
-   if root then
-    for _,v in pairs(root:GetDescendants()) do
-     if v:IsA("TextLabel") then
-      -- Palitan yung rene-batebonia title
-      if v.Text:lower():find("rene") and v.Text:lower():find("batebonia") then
-       v.Text = "RENZ HUB | By RENZ"
+  local function fix(obj)
+    pcall(function()
+      if obj:IsA("TextLabel") then
+        if obj.Text:lower():find("rene") or obj.Text:lower():find("batebonia") then
+          obj.Text = "RENZ HUB | By RENZ"
+        end
       end
-     end
-     if v:IsA("TextLabel") or v:IsA("TextButton") then
-      if v.Text == "Owner" then
-       -- Itago yung buong Owner tab/button
-       pcall(function() v.Parent.Visible = false end)
-       pcall(function() v.Parent.Parent.Visible = false end)
-       -- Kung nasa loob ng list, burahin
-       if v.Parent:FindFirstChild("Owner") or v.Text == "Owner" then
-        -- wag i-destroy agad para di mag error hub, itago lang
-        v.Text = ""
-       end
+      if obj.Text == "Owner" then
+        obj.Visible = false
+        if obj.Parent then 
+          obj.Parent.Visible = false 
+          -- try itago pati grandparent
+          if obj.Parent.Parent and obj.Parent.Parent:FindFirstChild("Owner") then
+            obj.Parent.Parent.Visible = false
+          end
+        end
       end
-     end
-    end
-   end
+    end)
   end
- end
+
+  -- Connect para kahit bagong gawa na label, mahuhuli agad
+  local cg = game:GetService("CoreGui")
+  cg.DescendantAdded:Connect(fix)
+  if gethui then
+    pcall(function() gethui().DescendantAdded:Connect(fix) end)
+  end
+  
+  -- Loop forever every 0.2 sec
+  while true do
+    task.wait(0.2)
+    for _,v in pairs(cg:GetDescendants()) do fix(v) end
+    if gethui then
+      for _,v in pairs(gethui():GetDescendants()) do fix(v) end
+    end
+  end
 end)
