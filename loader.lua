@@ -1,6 +1,6 @@
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
-local LOGO = "rbxassetid://YOUR_LOGO_ID"
+local LOGO = "rbxassetid://85660407447010"
 
 local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
