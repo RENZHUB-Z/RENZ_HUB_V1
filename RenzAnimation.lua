@@ -369,5 +369,37 @@ ElysiaTab.MouseButton1Click:Connect(function() SetTab(ElysiaTab) CurrentList=Ely
 SearchBar:GetPropertyChangedSignal("Text"):Connect(function() CreateButtons(SearchBar.Text) end)
 
 local dragging, dragInput, dragStart, startPos
-local function update(input) local delta=input.Position-dragStart MainFrame.Position=UDim2.new(startPos.X.Scale, startPos.X.Offset+delta.X, startPos.Y.Scale, startPos.Y.Offset+delta.Y) end
-TitleBar.InputBegan:Connect(function(input) if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then dragging=true dragStart=input.Position startPos=MainFrame.Position input
+local function update(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then update(input) end
+end)
+
+ExitBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+end)
+UIS.InputBegan:Connect(function(input,gp)
+    if not gp and input.KeyCode == Enum.KeyCode.RightShift then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+CreateButtons("")
+print("RENZ HUB V10 MIX & MATCH Loaded")
