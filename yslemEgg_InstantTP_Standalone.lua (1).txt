@@ -1,4 +1,4 @@
--- yslemEgg | Instant TP
+-- RENZHUB | Instant TP
 -- Pick a pet (icon + value), press Steal: taken and delivered with the Instant TP logic only.
 
 local Players = game:GetService("Players")
