@@ -538,7 +538,7 @@ local function slog(msg)
 end
 
 pcall(function()
-	getgenv().RenzHubSemiReport = function()
+	getgenv().YslemSemiReport = function()
 		return table.concat(semi.Log, "\n")
 	end
 end)
@@ -3924,7 +3924,7 @@ if old then
 	old:Destroy()
 end
 
-local gui = make("ScreenGui", { Name = "RenzHubEgg", DisplayOrder = 200000, ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true })
+local gui = make("ScreenGui", { Name = "YslemEgg", DisplayOrder = 200000, ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true })
 gui.Parent = parentGui()
 
 local W, H, HEADER = 150, 214, 20
