@@ -538,7 +538,7 @@ local function slog(msg)
 end
 
 pcall(function()
-	getgenv().YslemSemiReport = function()
+	getgenv().RenzHubSemiReport = function()
 		return table.concat(semi.Log, "\n")
 	end
 end)
@@ -750,7 +750,7 @@ local function hidePrompts(hide)
 			if playerGui then
 				for _, promptGui in ipairs(playerGui:GetChildren()) do
 					local guiName = string.lower(promptGui.Name)
-					if promptGui:IsA("ScreenGui") and promptGui.Enabled and not string.find(guiName, "RenzHubV2", 1, true)
+					if promptGui:IsA("ScreenGui") and promptGui.Enabled and not string.find(guiName, "yslem", 1, true)
 						and (string.find(guiName, "prompt", 1, true) or string.find(guiName, "interact", 1, true)) then
 						promptGui.Enabled = false
 						promptSaved.guis[#promptSaved.guis + 1] = promptGui
@@ -3924,7 +3924,7 @@ if old then
 	old:Destroy()
 end
 
-local gui = make("ScreenGui", { Name = "yslemEgg", DisplayOrder = 200000, ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true })
+local gui = make("ScreenGui", { Name = "RenzHubEgg", DisplayOrder = 200000, ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true })
 gui.Parent = parentGui()
 
 local W, H, HEADER = 150, 214, 20
@@ -3939,7 +3939,7 @@ header.Parent = window
 corner(header, 10)
 text(header, {
 	Size = UDim2.new(1, -44, 1, 0), Position = UDim2.fromOffset(6, 0), Font = Enum.Font.GothamBlack, TextSize = 10,
-	TextColor3 = Color3.new(0, 0, 0), TextXAlignment = Enum.TextXAlignment.Left, Text = "yslemEgg",
+	TextColor3 = Color3.new(0, 0, 0), TextXAlignment = Enum.TextXAlignment.Left, Text = "RenzHubV2",
 })
 
 local function headerButton(label, offset)
@@ -4202,4 +4202,3 @@ task.spawn(function()
 end)
 
 shieldStart()
-
