@@ -750,7 +750,7 @@ local function hidePrompts(hide)
 			if playerGui then
 				for _, promptGui in ipairs(playerGui:GetChildren()) do
 					local guiName = string.lower(promptGui.Name)
-					if promptGui:IsA("ScreenGui") and promptGui.Enabled and not string.find(guiName, "yslem", 1, true)
+					if promptGui:IsA("ScreenGui") and promptGui.Enabled and not string.find(guiName, "RenzHubV2", 1, true)
 						and (string.find(guiName, "prompt", 1, true) or string.find(guiName, "interact", 1, true)) then
 						promptGui.Enabled = false
 						promptSaved.guis[#promptSaved.guis + 1] = promptGui
