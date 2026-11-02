@@ -8801,7 +8801,7 @@ make("UIGradient", {
 local headerTitle = text(header, {
 	Size = UDim2.new(1, -196, 1, 0), Position = UDim2.fromOffset(10, 0), Font = Enum.Font.GothamBold, TextSize = 14,
 	TextColor3 = THEME.Text, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
-	TextTruncate = Enum.TextTruncate.AtEnd, TextWrapped = false, Text = "S2r Hub | Steal",
+	TextTruncate = Enum.TextTruncate.AtEnd, TextWrapped = false, Text = "Renz Hub | Steal",
 })
 
 local function headerButton(label, offset)
