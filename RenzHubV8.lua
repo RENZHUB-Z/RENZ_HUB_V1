@@ -10438,7 +10438,7 @@ do
         eggPage.Visible = false
         runtime.bigEggFinder.IsOpen = false
         headerButtonHw.Text = open and "Back" or "Halloween"
-        headerTitle.Text = open and "S2r Hub | Halloween" or "S2r Hub | Steal"
+        headerTitle.Text = open and "Renz Hub | Halloween" or "Renz Hub | Steal"
         pageButton.Text = "Eggs"
         if open then ui.NextCatalog = 0; ui.sync(true) end
         return true
@@ -10485,7 +10485,7 @@ local function setMainPage(showEggs)
     body.Visible = not minimized and not showingEggPage
     eggPage.Visible = not minimized and showingEggPage
     runtime.bigEggFinder.IsOpen = eggPage.Visible
-    headerTitle.Text = showingEggPage and "S2r Hub | Big Eggs" or "S2r Hub | Steal"
+    headerTitle.Text = showingEggPage and "Renz Hub | Big Eggs" or "Renz Hub | Steal"
     pageButton.Text = showingEggPage and "Back" or "Eggs"
     if showingEggPage then runtime.spawn(refreshBigEggs) end
     return true
